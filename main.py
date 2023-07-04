@@ -9,29 +9,28 @@ pygame.init()
 
 pygame.display.set_caption("Platformer")
 
-
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 800, 700
 
 FPS = 60
 PLAYER_VELOCITY = 5
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
-class Player(pygame.sprite.Sprite):
-    COLOR = (255,0,0)
 
-    def __init__(self, x,y, width,height):
-        self.rect = pygame.Rect(x,y,width,height)
+class Player(pygame.sprite.Sprite):
+    COLOR = (255, 0, 0)
+
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
         self.x_velocity = 0
         self.y_velocity = 0
         self.mask = None
         self.direction = "left"
         self.animation_count = 0
 
-
-    def move(self,dx,dy):
-        self.rect.x = dx
-        self.rect.y = dy
+    def move(self, dx, dy):
+        self.rect.x += dx
+        self.rect.y += dy
 
     def move_left(self, vel):
         self.x_velocity = -vel
@@ -39,17 +38,18 @@ class Player(pygame.sprite.Sprite):
             self.direction = "left"
             self.animation_count = 0
 
-    def move_right(self,vel):
+    def move_right(self, vel):
         self.x_velocity = vel
         if self.direction != "right":
             self.direction = "right"
             self.animation_count = 0
 
-    def loop(self,fps):
-        self.move(self.x_velocity,self.y_velocity)
+    def loop(self, fps):
+        self.move(self.x_velocity, self.y_velocity)
 
-    def draw(self,window):
-        pygame.draw.rect(window,self.COLOR, self.rect)
+    def draw(self, window):
+        pygame.draw.rect(window, self.COLOR, self.rect)
+
 
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
@@ -72,11 +72,21 @@ def draw(window, background, bg_image, player):
     pygame.display.update()
 
 
+def handle_move(player):
+    keys = pygame.key.get_pressed()
+
+    player.x_velocity = 0
+    if keys[pygame.K_LEFT]:
+        player.move_left(PLAYER_VELOCITY)
+    if keys[pygame.K_RIGHT]:
+        player.move_right(PLAYER_VELOCITY)
+
+
 def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("Green.png")
 
-    player = Player(100,100,50,50)
+    player = Player(100, 100, 50, 50)
 
     run = True
     while run:
@@ -87,7 +97,9 @@ def main(window):
                 run = False
                 break
 
-        draw(window,background,bg_image,player)
+        player.loop(FPS)
+        handle_move(player)
+        draw(window, background, bg_image, player)
 
     pygame.quit()
     quit()
